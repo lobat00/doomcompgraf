@@ -7,12 +7,6 @@
 float anguloPiramide = 0.0f;
 float anguloEsfera = 0.0f;
 
-float camX = 0.0f;
-float camY = 1.5f;
-float camZ = 25.0f;
-float yaw = 0.0f;
-float pitch = 0.0f;
-
 int fps = 0;
 int frameCount = 0;
 int previousTime = 0;
@@ -95,7 +89,7 @@ int main(int argc, char **argv)
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 
-    glutInitWindowSize(1920, 1080);
+    glutInitWindowSize(janelaW, janelaH);
     glutCreateWindow("Um dia vai ser DOOM");
 
     glEnable(GL_DEPTH_TEST);
@@ -106,7 +100,7 @@ int main(int argc, char **argv)
     glutKeyboardFunc(keyboard);
     glutKeyboardUpFunc(keyboardUp);
     glutPassiveMotionFunc(mouseMotion);
-    
+
     glutSetCursor(GLUT_CURSOR_NONE); // esconde o cursor
 
     glutTimerFunc(0, timer, 0);

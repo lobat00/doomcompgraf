@@ -9,6 +9,7 @@
                 "-g",
                 "draw.cpp",
                 "input.cpp",
+                "scene.cpp",
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",

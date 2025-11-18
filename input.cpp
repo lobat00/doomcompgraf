@@ -2,54 +2,6 @@
 #include <math.h>
 #include "scene.h"
 
-static int centerX = 0;
-static int centerY = 0;
-
-// evita loop infinito quando fazemos warp do mouse
-static bool ignoreWarp = false;
-
-static bool firstMouse = true;
-
-// estados das teclas
-static bool keyW = false;
-static bool keyA = false;
-static bool keyS = false;
-static bool keyD = false;
-
-bool fullScreen = false;
-int janelaX = 100, janelaY = 100;
-int janelaW = 1920, janelaH = 1080;
-
-void atualizaCentroJanela(int w, int h)
-{
-    centerX = w / 2;
-    centerY = h / 2;
-}
-
-void altFullScreen()
-{
-    firstMouse = true;
-
-    if (!fullScreen)
-    {
-        // salvar tamanho e posição atuais
-        janelaX = glutGet(GLUT_WINDOW_X);
-        janelaY = glutGet(GLUT_WINDOW_Y);
-        janelaW = glutGet(GLUT_WINDOW_WIDTH);
-        janelaH = glutGet(GLUT_WINDOW_HEIGHT);
-
-        glutFullScreen(); // entra no fullscreen
-        fullScreen = true;
-    }
-    else
-    {
-        glutReshapeWindow(janelaW, janelaH);
-        glutPositionWindow(janelaX, janelaY);
-
-        fullScreen = false;
-    }
-}
-
 void keyboard(unsigned char key, int x, int y)
 {
     switch (key)
