@@ -57,7 +57,7 @@ void display()
         previousTime = currentTime;
 
         char titulo[64];
-        sprintf(titulo, "Cena FPS - %d FPS", fps);
+        sprintf(titulo, "Um dia vai ser DOOM (%d FPS)", fps);
         glutSetWindowTitle(titulo);
     }
 }
