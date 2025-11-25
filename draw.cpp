@@ -5,6 +5,10 @@
 #define NUM_TORRES 5
 #define RAIO 10.0f // raio das torres ao redor do centro
 
+extern GLuint texChao;
+extern GLuint texTorre;
+extern GLuint texDegrau;
+
 static void desenhaLosango(float altura)
 {
     float h = altura / 2.0f;
@@ -60,12 +64,20 @@ static void desenhaLosango(float altura)
 
 void desenhaChao()
 {
-    glColor3f(0.2f, 0.2f, 0.2f);
+    glBindTexture(GL_TEXTURE_2D, texChao);
+    glColor3f(1, 1, 1);
+
+    float tiles = 75.0f;
+
     glBegin(GL_QUADS);
-    glVertex3f(-80.0f, 0.0f, -80.0f);
-    glVertex3f(80.0f, 0.0f, -80.0f);
-    glVertex3f(80.0f, 0.0f, 80.0f);
-    glVertex3f(-80.0f, 0.0f, 80.0f);
+    glTexCoord2f(0, 0);
+    glVertex3f(-80, 0, -80);
+    glTexCoord2f(tiles, 0);
+    glVertex3f(80, 0, -80);
+    glTexCoord2f(tiles, tiles);
+    glVertex3f(80, 0, 80);
+    glTexCoord2f(0, tiles);
+    glVertex3f(-80, 0, 80);
     glEnd();
 }
 
@@ -88,13 +100,70 @@ void desenhaTorresELosangos()
 
         // Torre roxa
         glPushMatrix();
-        glColor3f(0.6f, 0.0f, 0.8f);
+        glBindTexture(GL_TEXTURE_2D, texTorre);
+        glColor3f(1.0f, 1.0f, 1.0f); // não “tingir” a textura
         glTranslatef(0.0f, alturaTorre / 2.0f, 0.0f);
         glScalef(w, alturaTorre, w);
-        glutSolidCube(1.0f);
+
+        float half = 0.5f;   // cubo unitário de -0.5 a 0.5
+        float tilesX = 1.0f; // repete 1x na horizontal
+        float tilesY = 2.0f; // repete 2x na vertical (ajuste se quiser)
+
+        glBegin(GL_QUADS);
+        // Frente (z positivo)
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3f(-half, -half, half);
+        glTexCoord2f(tilesX, 0.0f);
+        glVertex3f(half, -half, half);
+        glTexCoord2f(tilesX, tilesY);
+        glVertex3f(half, half, half);
+        glTexCoord2f(0.0f, tilesY);
+        glVertex3f(-half, half, half);
+
+        // Trás (z negativo)
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3f(half, -half, -half);
+        glTexCoord2f(tilesX, 0.0f);
+        glVertex3f(-half, -half, -half);
+        glTexCoord2f(tilesX, tilesY);
+        glVertex3f(-half, half, -half);
+        glTexCoord2f(0.0f, tilesY);
+        glVertex3f(half, half, -half);
+
+        // Direita (x positivo)
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3f(half, -half, half);
+        glTexCoord2f(tilesX, 0.0f);
+        glVertex3f(half, -half, -half);
+        glTexCoord2f(tilesX, tilesY);
+        glVertex3f(half, half, -half);
+        glTexCoord2f(0.0f, tilesY);
+        glVertex3f(half, half, half);
+
+        // Esquerda (x negativo)
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3f(-half, -half, -half);
+        glTexCoord2f(tilesX, 0.0f);
+        glVertex3f(-half, -half, half);
+        glTexCoord2f(tilesX, tilesY);
+        glVertex3f(-half, half, half);
+        glTexCoord2f(0.0f, tilesY);
+        glVertex3f(-half, half, -half);
+
+        // Topo
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3f(-half, half, half);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3f(half, half, half);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3f(half, half, -half);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3f(-half, half, -half);
+
+        glEnd();
         glPopMatrix();
 
-        // Losango verde girando em cima 
+        // Losango verde girando em cima
         glPushMatrix();
         glTranslatef(0.0f, alturaTorre + 1.2f, 0.0f);
         glRotatef(anguloPiramide, 0.0f, 1.0f, 0.0f);

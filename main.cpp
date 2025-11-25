@@ -3,6 +3,7 @@
 #include <cstdio>
 #include "scene.h"
 #include "input.h"
+#include "texture.h"
 
 float anguloPiramide = 0.0f;
 float anguloEsfera = 0.0f;
@@ -10,6 +11,10 @@ float anguloEsfera = 0.0f;
 int fps = 0;
 int frameCount = 0;
 int previousTime = 0;
+
+GLuint texChao;
+GLuint texTorre;
+GLuint texDegrau;
 
 void display()
 {
@@ -93,6 +98,13 @@ int main(int argc, char **argv)
     glutCreateWindow("Um dia vai ser DOOM");
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
+
+    //carregando texturas
+    texChao = carregaTextura("assets/181.png"); 
+    texTorre = carregaTextura("assets/091.png");
+    texDegrau = carregaTextura("assets/179.png");
+
     glClearColor(0.05f, 0.05f, 0.1f, 1.0f);
 
     glutDisplayFunc(display);
@@ -105,7 +117,6 @@ int main(int argc, char **argv)
 
     glutTimerFunc(0, timer, 0);
 
-    // glutFullScreen();
     glutMainLoop();
     return 0;
 }
