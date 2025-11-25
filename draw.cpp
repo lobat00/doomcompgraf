@@ -182,34 +182,211 @@ void desenhaPiramideDegraus()
 
     glPushMatrix();
 
-    float roxo1[3] = {0.55f, 0.00f, 0.75f};
-    float roxo2[3] = {0.65f, 0.10f, 0.85f};
-    float roxo3[3] = {0.75f, 0.20f, 0.95f};
+    // vamos usar um cubo unitário de -0.5 a 0.5
+    float half = 0.5f;
 
     // Degrau 1
-    glColor3f(roxo1[0], roxo1[1], roxo1[2]);
+    float larg = tamanhoBase;    // largura/profundidade
+    float tilesX = larg;         // repetição em X
+    float tilesZ = larg;         // repetição em Z
+    float tilesY = alturaDegrau; // repetição em Y (altura)
+
+    glBindTexture(GL_TEXTURE_2D, texDegrau);
+    glColor3f(1.0f, 1.0f, 1.0f);
+
     glPushMatrix();
     glTranslatef(0.0f, alturaDegrau / 2.0f, 0.0f);
     glScalef(tamanhoBase, alturaDegrau, tamanhoBase);
-    glutSolidCube(1.0f);
+
+    glBegin(GL_QUADS);
+    // Frente (z+)
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-half, -half, half);
+    glTexCoord2f(tilesX, 0.0f);
+    glVertex3f(half, -half, half);
+    glTexCoord2f(tilesX, tilesY);
+    glVertex3f(half, half, half);
+    glTexCoord2f(0.0f, tilesY);
+    glVertex3f(-half, half, half);
+
+    // Trás (z-)
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(half, -half, -half);
+    glTexCoord2f(tilesX, 0.0f);
+    glVertex3f(-half, -half, -half);
+    glTexCoord2f(tilesX, tilesY);
+    glVertex3f(-half, half, -half);
+    glTexCoord2f(0.0f, tilesY);
+    glVertex3f(half, half, -half);
+
+    // Direita (x+)
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(half, -half, half);
+    glTexCoord2f(tilesX, 0.0f);
+    glVertex3f(half, -half, -half);
+    glTexCoord2f(tilesX, tilesY);
+    glVertex3f(half, half, -half);
+    glTexCoord2f(0.0f, tilesY);
+    glVertex3f(half, half, half);
+
+    // Esquerda (x-)
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-half, -half, -half);
+    glTexCoord2f(tilesX, 0.0f);
+    glVertex3f(-half, -half, half);
+    glTexCoord2f(tilesX, tilesY);
+    glVertex3f(-half, half, half);
+    glTexCoord2f(0.0f, tilesY);
+    glVertex3f(-half, half, -half);
+
+    // Topo
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-half, half, half);
+    glTexCoord2f(tilesX, 0.0f);
+    glVertex3f(half, half, half);
+    glTexCoord2f(tilesX, tilesZ);
+    glVertex3f(half, half, -half);
+    glTexCoord2f(0.0f, tilesZ);
+    glVertex3f(-half, half, -half);
+
+    glEnd();
+
     glPopMatrix();
 
     // Degrau 2
-    glColor3f(roxo2[0], roxo2[1], roxo2[2]);
+    larg = tamanhoBase * reducao;
+    tilesX = larg;
+    tilesZ = larg;
+    tilesY = alturaDegrau;
+
+    glBindTexture(GL_TEXTURE_2D, texDegrau);
+    glColor3f(1.0f, 1.0f, 1.0f);
+
     glPushMatrix();
     glTranslatef(0.0f, alturaDegrau + alturaDegrau / 2.0f, 0.0f);
     glScalef(tamanhoBase * reducao, alturaDegrau, tamanhoBase * reducao);
-    glutSolidCube(1.0f);
+
+    glBegin(GL_QUADS);
+    // Frente (z+)
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-half, -half, half);
+    glTexCoord2f(tilesX, 0.0f);
+    glVertex3f(half, -half, half);
+    glTexCoord2f(tilesX, tilesY);
+    glVertex3f(half, half, half);
+    glTexCoord2f(0.0f, tilesY);
+    glVertex3f(-half, half, half);
+
+    // Trás (z-)
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(half, -half, -half);
+    glTexCoord2f(tilesX, 0.0f);
+    glVertex3f(-half, -half, -half);
+    glTexCoord2f(tilesX, tilesY);
+    glVertex3f(-half, half, -half);
+    glTexCoord2f(0.0f, tilesY);
+    glVertex3f(half, half, -half);
+
+    // Direita (x+)
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(half, -half, half);
+    glTexCoord2f(tilesX, 0.0f);
+    glVertex3f(half, -half, -half);
+    glTexCoord2f(tilesX, tilesY);
+    glVertex3f(half, half, -half);
+    glTexCoord2f(0.0f, tilesY);
+    glVertex3f(half, half, half);
+
+    // Esquerda (x-)
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-half, -half, -half);
+    glTexCoord2f(tilesX, 0.0f);
+    glVertex3f(-half, -half, half);
+    glTexCoord2f(tilesX, tilesY);
+    glVertex3f(-half, half, half);
+    glTexCoord2f(0.0f, tilesY);
+    glVertex3f(-half, half, -half);
+
+    // Topo
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-half, half, half);
+    glTexCoord2f(tilesX, 0.0f);
+    glVertex3f(half, half, half);
+    glTexCoord2f(tilesX, tilesZ);
+    glVertex3f(half, half, -half);
+    glTexCoord2f(0.0f, tilesZ);
+    glVertex3f(-half, half, -half);
+    glEnd();
+
     glPopMatrix();
 
     // Degrau 3
-    glColor3f(roxo3[0], roxo3[1], roxo3[2]);
+    larg = tamanhoBase * reducao * reducao;
+    tilesX = larg;
+    tilesZ = larg;
+    tilesY = alturaDegrau;
+
+    glBindTexture(GL_TEXTURE_2D, texDegrau);
+    glColor3f(1.0f, 1.0f, 1.0f);
+
     glPushMatrix();
     glTranslatef(0.0f, 2 * alturaDegrau + alturaDegrau / 2.0f, 0.0f);
     glScalef(tamanhoBase * reducao * reducao,
              alturaDegrau,
              tamanhoBase * reducao * reducao);
-    glutSolidCube(1.0f);
+
+    glBegin(GL_QUADS);
+    // Frente (z+)
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-half, -half, half);
+    glTexCoord2f(tilesX, 0.0f);
+    glVertex3f(half, -half, half);
+    glTexCoord2f(tilesX, tilesY);
+    glVertex3f(half, half, half);
+    glTexCoord2f(0.0f, tilesY);
+    glVertex3f(-half, half, half);
+
+    // Trás (z-)
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(half, -half, -half);
+    glTexCoord2f(tilesX, 0.0f);
+    glVertex3f(-half, -half, -half);
+    glTexCoord2f(tilesX, tilesY);
+    glVertex3f(-half, half, -half);
+    glTexCoord2f(0.0f, tilesY);
+    glVertex3f(half, half, -half);
+
+    // Direita (x+)
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(half, -half, half);
+    glTexCoord2f(tilesX, 0.0f);
+    glVertex3f(half, -half, -half);
+    glTexCoord2f(tilesX, tilesY);
+    glVertex3f(half, half, -half);
+    glTexCoord2f(0.0f, tilesY);
+    glVertex3f(half, half, half);
+
+    // Esquerda (x-)
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-half, -half, -half);
+    glTexCoord2f(tilesX, 0.0f);
+    glVertex3f(-half, -half, half);
+    glTexCoord2f(tilesX, tilesY);
+    glVertex3f(-half, half, half);
+    glTexCoord2f(0.0f, tilesY);
+    glVertex3f(-half, half, -half);
+
+    // Topo
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-half, half, half);
+    glTexCoord2f(tilesX, 0.0f);
+    glVertex3f(half, half, half);
+    glTexCoord2f(tilesX, tilesZ);
+    glVertex3f(half, half, -half);
+    glTexCoord2f(0.0f, tilesZ);
+    glVertex3f(-half, half, -half);
+    glEnd();
+
     glPopMatrix();
 
     // Esfera flutuando acima

@@ -15,6 +15,7 @@ int previousTime = 0;
 GLuint texChao;
 GLuint texTorre;
 GLuint texDegrau;
+GLuint texEsfera;
 
 void display()
 {
@@ -103,7 +104,8 @@ int main(int argc, char **argv)
     //carregando texturas
     texChao = carregaTextura("assets/181.png"); 
     texTorre = carregaTextura("assets/091.png");
-    texDegrau = carregaTextura("assets/179.png");
+    texDegrau = carregaTextura("assets/190.png");
+    texEsfera = carregaTextura("assets/540.png");
 
     glClearColor(0.05f, 0.05f, 0.1f, 1.0f);
 
