@@ -8,7 +8,6 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "-Iinclude",
-                "draw.cpp",
                 "src/engine/input.cpp",
                 "src/engine/scene.cpp",
                 "src/engine/texture.cpp",

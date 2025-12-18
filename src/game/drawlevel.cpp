@@ -18,7 +18,7 @@ extern GLuint progLava;
 extern GLuint progSangue;
 
 // Controle de tempo
-extern float tempoEsfera;
+extern float tempo;
 
 // Config do grid
 static const float TILE = 4.0f;      // tamanho do tile no mundo (ajuste)
@@ -160,7 +160,7 @@ static void desenhaTileLava(float x, float z)
     GLint locHeat = glGetUniformLocation(progLava, "uHeat");
     GLint locTex = glGetUniformLocation(progLava, "uTexture");
 
-    glUniform1f(locTime, tempoEsfera);
+    glUniform1f(locTime, tempo);
     glUniform1f(locStr, 1.0f);
     glUniform2f(locScr, 0.1f, 0.0f);
     glUniform1f(locHeat, 0.6f);
@@ -183,7 +183,7 @@ static void desenhaTileSangue(float x, float z)
     GLint locSpd = glGetUniformLocation(progSangue, "uSpeed");
     GLint locTex = glGetUniformLocation(progSangue, "uTexture");
 
-    glUniform1f(locTime, tempoEsfera);
+    glUniform1f(locTime, tempo);
     glUniform1f(locStr, 1.0f);
     glUniform2f(locSpd, 2.0f, 1.3f);
 

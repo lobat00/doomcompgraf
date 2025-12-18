@@ -1,9 +1,7 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-extern float anguloPiramide;
-extern float anguloEsfera;
-extern float tempoEsfera;
+extern float tempo;
 
 extern float camX, camY, camZ;
 extern float yaw, pitch;

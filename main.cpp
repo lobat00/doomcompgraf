@@ -12,9 +12,7 @@
 
 static MapLoader gMap;
 
-float anguloPiramide = 0.0f;
-float anguloEsfera = 0.0f;
-float tempoEsfera = 0.0f;
+float tempo = 0.0f;
 
 int fps = 0;
 int frameCount = 0;
@@ -87,15 +85,7 @@ void reshape(int w, int h)
 
 void timer(int v)
 {
-    anguloPiramide += 1.5f;
-    if (anguloPiramide >= 360.0f)
-        anguloPiramide -= 360.0f;
-
-    anguloEsfera += 1.0f;
-    if (anguloEsfera >= 360.0f)
-        anguloEsfera -= 360.0f;
-
-    tempoEsfera += 0.016f;
+    tempo += 0.016f;
 
     atualizaMovimento();
 
