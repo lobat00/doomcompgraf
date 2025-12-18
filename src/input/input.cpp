@@ -1,6 +1,8 @@
 #include <GL/glut.h>
 #include <math.h>
-#include "core/scene.h"
+#include "input/keystate.h"
+#include "core/camera.h"
+#include "core/window.h"
 
 void keyboard(unsigned char key, int x, int y)
 {

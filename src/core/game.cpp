@@ -3,7 +3,7 @@
 #include "level/level.h"
 #include "core/config.h"
 
-#include "core/scene.h"
+#include "core/camera.h"
 #include "input/input.h"
 #include "graphics/drawlevel.h"
 

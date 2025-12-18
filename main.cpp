@@ -3,7 +3,7 @@
 #include <cstdio>
 
 #include "core/app.h"
-#include "core/scene.h"
+#include "core/window.h"
 #include "core/game.h"
 
 int main(int argc, char** argv)

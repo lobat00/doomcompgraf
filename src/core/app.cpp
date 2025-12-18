@@ -1,5 +1,5 @@
 #include "core/app.h"
-#include "core/scene.h"
+#include "core/window.h"
 #include "core/fps.h"
 #include "core/game.h"
 #include "core/config.h"

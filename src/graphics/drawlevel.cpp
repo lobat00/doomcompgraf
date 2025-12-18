@@ -2,7 +2,7 @@
 #include <GL/glut.h>
 #include <cmath>
 #include "graphics/drawlevel.h"
-#include "core/scene.h"
+#include "core/camera.h"
 #include "level/levelmetrics.h"
 #include <cstdio>
 
