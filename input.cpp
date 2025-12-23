@@ -1,6 +1,7 @@
 #include <GL/glut.h>
 #include <math.h>
 #include "scene.h"
+#include "utils/levelmetrics.h"
 
 void keyboard(unsigned char key, int x, int y)
 {
@@ -63,37 +64,59 @@ void keyboardUp(unsigned char key, int x, int y)
     }
 }
 
-void atualizaMovimento()
-{
-    float passo = 0.15f; // pode ajustar a velocidade aqui
+bool podeAndar(float x, float z) {
+    // 1. Criamos a mesma métrica usada no desenho
+    float TILE = 4.0f;
+    LevelMetrics m = LevelMetrics::fromMap(gMap, TILE);
 
+    // 2. Convertemos a posição do mundo (x, z) para coordenadas de grid (col, row)
+    // A LevelMetrics tem funções para isso. Se não tiver, usamos a lógica reversa do tileCenter.
+    int gridX, gridZ;
+    
+    // O LevelMetrics geralmente centraliza o mapa subtraindo metade do tamanho total.
+    gridX = (int)floor((x / TILE) + (gMap.getWidth() / 2.0f));
+    gridZ = (int)floor((z / TILE) + (gMap.getHeight() / 2.0f));
+
+    // 3. Verificamos as fronteiras
+    if (gridZ < 0 || gridZ >= (int)gMap.getHeight() || gridX < 0) return false;
+
+    const auto &data = gMap.data();
+    if (gridX >= (int)data[gridZ].size()) return false;
+
+    // 4. Retorna true se NÃO for parede ('1')
+    return (data[gridZ][gridX] != '1');
+}
+
+void atualizaMovimento() {
+    float passo = 0.15f; 
     float radYaw = yaw * M_PI / 180.0f;
     float dirX = std::sin(radYaw);
     float dirZ = -std::cos(radYaw);
-
-    // vetor perpendicular pra strafe
     float strafeX = dirZ;
     float strafeZ = -dirX;
 
-    if (keyW)
-    { // frente
-        camX += dirX * passo;
-        camZ += dirZ * passo;
+    float dx = 0, dz = 0;
+    if (keyW) { dx += dirX; dz += dirZ; }
+    if (keyS) { dx -= dirX; dz -= dirZ; }
+    if (keyA) { dx += strafeX; dz += strafeZ; }
+    if (keyD) { dx -= strafeX; dz -= strafeZ; }
+
+    float tentX = dx * passo;
+    float tentZ = dz * passo;
+
+    // Slide 4: Margem de segurança (corpo do jogador)
+    float margem = 0.6f;
+    float cX = (tentX > 0) ? tentX + margem : tentX - margem;
+    float cZ = (tentZ > 0) ? tentZ + margem : tentZ - margem;
+
+    // Tenta mover no X (Slide 8 - Sliding)
+    if (podeAndar(camX + cX, camZ)) {
+        camX += tentX;
     }
-    if (keyS)
-    { // trás
-        camX -= dirX * passo;
-        camZ -= dirZ * passo;
-    }
-    if (keyA)
-    { // strafe esquerda
-        camX += strafeX * passo;
-        camZ += strafeZ * passo;
-    }
-    if (keyD)
-    { // strafe direita
-        camX -= strafeX * passo;
-        camZ -= strafeZ * passo;
+
+    // Tenta mover no Z
+    if (podeAndar(camX, camZ + cZ)) {
+        camZ += tentZ;
     }
 }
 

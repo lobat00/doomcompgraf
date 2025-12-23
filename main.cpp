@@ -10,7 +10,7 @@
 #include "drawlevel.h"
 #include "utils/levelmetrics.h"
 
-static MapLoader gMap;
+MapLoader gMap;
 
 float anguloPiramide = 0.0f;
 float anguloEsfera = 0.0f;
