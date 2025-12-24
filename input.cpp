@@ -1,7 +1,7 @@
 #include <GL/glut.h>
 #include <math.h>
 #include "scene.h"
-#include "utils/levelmetrics.h"
+#include "utils/levelmetrics.h" // para LevelMetrics
 
 void keyboard(unsigned char key, int x, int y)
 {
@@ -65,28 +65,31 @@ void keyboardUp(unsigned char key, int x, int y)
 }
 
 bool podeAndar(float x, float z) {
-    // 1. Criamos a mesma métrica usada no desenho
+    // 1. Obtemos as métricas do mapa
     float TILE = 4.0f;
     LevelMetrics m = LevelMetrics::fromMap(gMap, TILE);
-
-    // 2. Convertemos a posição do mundo (x, z) para coordenadas de grid (col, row)
-    // A LevelMetrics tem funções para isso. Se não tiver, usamos a lógica reversa do tileCenter.
     int gridX, gridZ;
     
-    // O LevelMetrics geralmente centraliza o mapa subtraindo metade do tamanho total.
     gridX = (int)floor((x / TILE) + (gMap.getWidth() / 2.0f));
     gridZ = (int)floor((z / TILE) + (gMap.getHeight() / 2.0f));
 
-    // 3. Verificamos as fronteiras
     if (gridZ < 0 || gridZ >= (int)gMap.getHeight() || gridX < 0) return false;
 
     const auto &data = gMap.data();
     if (gridX >= (int)data[gridZ].size()) return false;
 
-    // 4. Retorna true se NÃO for parede ('1')
-    return (data[gridZ][gridX] != '1');
-}
 
+    char celula = data[gridZ][gridX];
+
+    // Se a célula for '1' (Pedra) OU '2' (Metal), o jogador NÃO pode andar
+    if (celula == '1' || celula == '2') {
+        return false;
+    }
+
+    // Para qualquer outro caractere (0, T, A, C, L, B), o caminho está livre
+    return true; 
+}
+// Atualiza a posição da câmera com base nas teclas pressionadas
 void atualizaMovimento() {
     float passo = 0.15f; 
     float radYaw = yaw * M_PI / 180.0f;

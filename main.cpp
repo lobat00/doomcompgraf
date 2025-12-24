@@ -10,7 +10,7 @@
 #include "drawlevel.h"
 #include "utils/levelmetrics.h"
 
-MapLoader gMap;
+MapLoader gMap; // mapa global
 
 float anguloPiramide = 0.0f;
 float anguloEsfera = 0.0f;
@@ -26,6 +26,8 @@ GLuint texSangue;
 GLuint texLava;
 GLuint progSangue;
 GLuint progLava;
+GLuint texParedeMetal;
+GLuint texPisoAlt;
 
 void display()
 {
@@ -123,6 +125,8 @@ int main(int argc, char **argv)
     texParede = carregaTextura("assets/091.png");
     texSangue = carregaTextura("assets/016.png");
     texLava = carregaTextura("assets/179.png");
+    texParedeMetal = carregaTextura("assets/088.png");
+    texPisoAlt = carregaTextura("assets/118.png");
 
     // cria o shader
     progSangue = criaShader("shaders/blood.vert", "shaders/blood.frag");
@@ -140,7 +144,7 @@ int main(int argc, char **argv)
 
     glutTimerFunc(0, timer, 0);
 
-    gMap.load("maps/map1.txt");
+    gMap.load("maps/map2.txt");
     LevelMetrics m = LevelMetrics::fromMap(gMap, 4.0f); 
     m.spawnPos(gMap, camX, camZ);
     camY = 1.5f;

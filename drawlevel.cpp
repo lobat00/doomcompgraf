@@ -10,6 +10,8 @@ extern GLuint texParede; // pode usar como textura de parede (ou crie texParede)
 extern GLuint texLava;
 extern GLuint texSangue; // pode usar como textura base do sangue (ou crie texBlood)
 extern GLuint texChao;
+extern GLuint texParedeMetal;
+extern GLuint texPisoAlt;
 
 extern GLuint progLava;
 extern GLuint progSangue;
@@ -26,6 +28,20 @@ static void bindTexture0(GLuint tex)
 {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, tex);
+}
+
+static void desenhaTeto(float x, float z) {
+    glUseProgram(0);
+    glColor3f(0.7f, 0.7f, 0.7f); // Um pouco mais escuro para dar profundidade
+    bindTexture0(texChao); // Pode usar a mesma do chão ou uma específica
+    
+    float half = TILE * 0.5f;
+    glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(x - half, WALL_H, z + half);
+        glTexCoord2f(2.0f, 0.0f); glVertex3f(x + half, WALL_H, z + half);
+        glTexCoord2f(2.0f, 2.0f); glVertex3f(x + half, WALL_H, z - half);
+        glTexCoord2f(0.0f, 2.0f); glVertex3f(x - half, WALL_H, z - half);
+    glEnd();
 }
 
 static void desenhaQuadChao(float x, float z, float tile, float tilesUV)
@@ -61,7 +77,7 @@ static void desenhaParede(float x, float z)
     float half = TILE * 0.5f;
 
     glColor3f(1, 1, 1);
-    glBindTexture(GL_TEXTURE_2D, texParede);
+    
 
     // textura repetida ao longo da parede
     float tilesX = 1.0f;
@@ -168,32 +184,43 @@ static void desenhaTileSangue(float x, float z)
     glUseProgram(0);
 }
 
-void drawLevel(const MapLoader &map)
-{
+void drawLevel(const MapLoader &map) {
     const auto &data = map.data();
     int H = map.getHeight();
-    int W = map.getWidth();
-
-    // centraliza o mapa no mundo
     LevelMetrics m = LevelMetrics::fromMap(map, TILE);
 
-    for (int z = 0; z < H; z++)
-    {
-        for (int x = 0; x < (int)data[z].size(); x++)
-        {
+    for (int z = 0; z < H; z++) {
+        for (int x = 0; x < (int)data[z].size(); x++) {
             float wx, wz;
-            m.tileCenter(x, z, wx, wz); // centro do tile
-
+            m.tileCenter(x, z, wx, wz);
             char c = data[z][x];
 
-            if (c == '0')
-                desenhaTileChao(wx, wz);
-            else if (c == '1')
+            // LOGICA DE PISO
+            if (c == '0' || c == 'T') {
+                desenhaTileChao(wx, wz); // Piso Comum
+            } else if (c == 'A' || c == 'C') {
+                // Precisamos que desenhaTileChao aceite a textura como parâmetro 
+                // ou criamos desenhaTileChaoAlt
+                glBindTexture(GL_TEXTURE_2D, texPisoAlt);
+                desenhaQuadChao(wx, wz, TILE, 2.0f);
+            }
+
+            // LOGICA DE PAREDE
+            if (c == '1') {
+                glBindTexture(GL_TEXTURE_2D, texParede); // Pedra
                 desenhaParede(wx, wz);
-            else if (c == 'L')
-                desenhaTileLava(wx, wz);
-            else if (c == 'B')
-                desenhaTileSangue(wx, wz);
+            } else if (c == '2') {
+                glBindTexture(GL_TEXTURE_2D, texParedeMetal); // Metal
+                desenhaParede(wx, wz);
+            }
+
+            // LOGICA DE TETO (Opcional por Tile)
+            if (c == 'T' || c == 'C') {
+                desenhaTeto(wx, wz);
+            }
+            
+            // Outros tipos (Lava, Sangue...)
+            else if (c == 'L') desenhaTileLava(wx, wz);
         }
     }
 }
