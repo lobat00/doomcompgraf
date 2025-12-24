@@ -86,6 +86,7 @@ bool podeAndar(float x, float z) {
     // 4. Retorna true se NÃO for parede ('1')
     return (data[gridZ][gridX] != '1');
 }
+// input.cpp
 
 void atualizaMovimento() {
     float passo = 0.15f; 
@@ -104,19 +105,42 @@ void atualizaMovimento() {
     float tentX = dx * passo;
     float tentZ = dz * passo;
 
-    // Slide 4: Margem de segurança (corpo do jogador)
-    float margem = 1.2f;
-    float cX = (tentX > 0) ? tentX + margem : tentX - margem;
-    float cZ = (tentZ > 0) ? tentZ + margem : tentZ - margem;
+    // "Gordura" do jogador (metade do tamanho do corpo)
+    // Se a margem for 1.0, o jogador tem 2.0 de largura total.
+    float LARGURA = 1.0f; 
 
-    // Tenta mover no X (Slide 8 - Sliding)
-    if (podeAndar(camX + cX, camZ)) {
-        camX += tentX;
+    // --- EIXO X (Sliding) ---
+    // Calculamos onde o jogador estaria no eixo X
+    float proximoX = camX + tentX;
+    bool colidiuX = false;
+
+    // VERIFICAÇÃO DE QUINA (4 PONTOS):
+    // Testamos os 4 cantos do quadrado do jogador na nova posição X, 
+    // mas mantendo o Z atual.
+    if (!podeAndar(proximoX + LARGURA, camZ + LARGURA)) colidiuX = true; // Frente-Direita
+    if (!podeAndar(proximoX + LARGURA, camZ - LARGURA)) colidiuX = true; // Trás-Direita
+    if (!podeAndar(proximoX - LARGURA, camZ + LARGURA)) colidiuX = true; // Frente-Esquerda
+    if (!podeAndar(proximoX - LARGURA, camZ - LARGURA)) colidiuX = true; // Trás-Esquerda
+
+    // Só anda no X se NENHUM dos 4 cantos bater
+    if (!colidiuX) {
+        camX = proximoX;
     }
 
-    // Tenta mover no Z
-    if (podeAndar(camX, camZ + cZ)) {
-        camZ += tentZ;
+    // --- EIXO Z (Sliding) ---
+    // Calculamos onde o jogador estaria no eixo Z
+    float proximoZ = camZ + tentZ;
+    bool colidiuZ = false;
+
+    // Testamos os 4 cantos na nova posição Z, usando o X (que já pode ter mudado ou não)
+    if (!podeAndar(camX + LARGURA, proximoZ + LARGURA)) colidiuZ = true;
+    if (!podeAndar(camX + LARGURA, proximoZ - LARGURA)) colidiuZ = true;
+    if (!podeAndar(camX - LARGURA, proximoZ + LARGURA)) colidiuZ = true;
+    if (!podeAndar(camX - LARGURA, proximoZ - LARGURA)) colidiuZ = true;
+
+    // Só anda no Z se NENHUM dos 4 cantos bater
+    if (!colidiuZ) {
+        camZ = proximoZ;
     }
 }
 
