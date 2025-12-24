@@ -1,121 +1,53 @@
-# ODEIOS
-- ODEIO DÁRIO
-- ODEIO HELOYSA
-- ODEIO AUZIER
-- ODEIO KELVIN
+# 🐛 Correção de Colisão: Bug das Diagonais (Clipping)
 
-# DoomLike OpenGL Project
+Esta atualização corrige o problema onde a câmera "entrava" nas paredes ao andar na diagonal ou ao encostar em quinas de blocos.
 
-Este projeto utiliza **OpenGL (pipeline fixo + GLSL 1.20)** para renderização,  
-**GLUT** para gerenciamento de janela/entrada e **GLEW** para carregar funções modernas  
-como shaders, VBOs e extensões necessárias.
+## 📄 Resumo do Problema
+O sistema de colisão anterior tratava o jogador como um ponto ou uma cruz (**+**). Isso deixava "pontos cegos" nas diagonais. Se o jogador andasse contra uma quina, o sensor central passava pelo vazio, mas o "ombro" do jogador atravessava a parede.
 
-## 🎥 Demonstração
-https://github.com/user-attachments/assets/a54eda50-ec44-4332-96ef-c4700e5cf88f
+## 🛠️ A Solução: Bounding Box (Caixa de Colisão)
+Alteramos a lógica para tratar o jogador como um **Quadrado (⬛)** com largura física. Agora, a cada movimento, testamos os **4 cantos** do jogador. Se *qualquer* um dos cantos tocar na parede, o movimento é bloqueado.
 
 ---
 
-## 📦 Dependências
+## 🔄 Comparativo Técnico
 
-Certifique-se de ter instalados os seguintes pacotes no seu sistema Linux:
+### 🔴 Antes: Lógica "Cruz" (Sensor Único)
+Verificávamos apenas um ponto à frente, baseado na direção do movimento.
 
-### 🛠️ Compilação
-- `g++`
-- `make`
-
-### 🖥️ Bibliotecas OpenGL
-- `freeglut`
-- `glew` (NOVA BIBLIOTECA QUE PRECISA INSTALAR)
-- `mesa`
-- `glu`
-
-### 🖼️ Carregamento de Texturas  
-- `stb_image.h` (arquivo de cabeçalho incluso no projeto)
-
----
-
-## 🚀 Compilar e Executar
-
-Use o comando abaixo para compilar o projeto e executá-lo imediatamente:
-
-### 🐧 Linux
-```bash
-g++ main.cpp draw.cpp input.cpp scene.cpp texture.cpp shader.cpp \
-    -o DoomLike \
-    -lGLEW -lGL -lGLU -lglut && ./DoomLike
+```ascii
+      ^ (Sensor Frente)
+      |
+      P (Jogador)
 ```
+      
+### Código Removido (input.cpp):
+```ascii
+// Calculava apenas a ponta do vetor de direção
+float cX = (tentX > 0) ? tentX + margem : tentX - margem;
+float cZ = (tentZ > 0) ? tentZ + margem : tentZ - margem;
 
-### 🪟 Windows
-```bash
-g++ main.cpp draw.cpp input.cpp scene.cpp texture.cpp shader.cpp ^
-    -o DoomLike.exe ^
-    -lglew32 -lfreeglut -lopengl32 -lglu32 && DoomLike.exe
+// Testava apenas se o centro deslocado batia
+if (podeAndar(camX + cX, camZ)) { ... }
 ```
-## 🎮 Como Jogar
+Falha: Ao passar raspando em uma quina, o sensor (seta) não batia em nada, mas a lateral da câmera entrava na parede.
 
-A cena pode ser explorada em primeira pessoa, com movimentação típica de FPS clássico.
+### 🟢 Depois: Lógica "Bounding Box" (4 Cantos)
+```ascii
+  (Canto) X-------X (Canto)
+            |   P   |
+    (Canto) X-------X (Canto)
+```
+Código Adicionado (input.cpp):
+```ascii
+  // Define a largura física do jogador (do centro até a borda)
+float LARGURA = 1.0f; 
 
----
-
-## ⌨️ Controles
-
-### 🧭 Movimento
-| Tecla | Ação |
-|-------|------|
-| **W** | Avançar |
-| **A** | Mover para a esquerda (strafe) |
-| **S** | Recuar |
-| **D** | Mover para a direita (strafe) |
-
----
-
-### 🖱️ Visão
-| Ação | Resultado |
-|------|-----------|
-| **Mover o mouse** | Olhar em qualquer direção |
-
----
-
-### 🪟 Janelas e Sistema
-| Tecla | Ação |
-|-------|------|
-| **Alt + Enter** | Alterna entre tela cheia e modo janela |
-| **ESC** | Encerra o programa |
-
----
-
-## 🗺️ Criando o Mapa (Matriz em `.txt`)
-
-O mapa do jogo é definido por um arquivo **texto (ASCII)**, onde **cada caractere representa um tile** do mundo.  
-Cada **linha do arquivo** corresponde a uma linha do mapa, e **todas as linhas devem ter o mesmo comprimento** (mesma quantidade de colunas).
-
----
-
-### ✅ Regras importantes
-- O arquivo deve ser salvo como `.txt`
-- Cada linha representa uma “fileira” do mapa
-- Todas as linhas precisam ter o mesmo tamanho
-- Use **apenas os caracteres da legenda abaixo**
-- Deve existir **exatamente um `9`** (posição inicial do jogador)
-
----
-
-### 🧩 Legenda do mapa (originais)
-| Caractere | Significado |
-|----------|-------------|
-| `1` | Parede |
-| `0` | Chão normal (piso) |
-| `L` | Lava (tile com shader de calor) |
-| `B` | Sangue (tile com shader de distorção) |
-| `9` | Spawn do jogador *(o loader converte para `0` após ler)* |
-
----
-
-### 📌 Exemplo simples de mapa
-```txt
-1111111111
-1000000001
-10L0000B01
-1000090001
-1000000001
-1111111111
+// Testamos os 4 CANTOS simultaneamente para cada eixo
+// Se qualquer um retornar false (parede), colidiuX vira true.
+if (!podeAndar(proximoX + LARGURA, camZ + LARGURA)) colidiuX = true; // Frente-Direita
+if (!podeAndar(proximoX + LARGURA, camZ - LARGURA)) colidiuX = true; // Trás-Direita
+if (!podeAndar(proximoX - LARGURA, camZ + LARGURA)) colidiuX = true; // Frente-Esquerda
+if (!podeAndar(proximoX - LARGURA, camZ - LARGURA)) colidiuX = true; // Trás-Esquerda
+```
+Correção: Agora é impossível uma quina de parede "furar" o jogador, pois um dos 4 cantos sempre detectará a colisão antes da câmera atravessar.
