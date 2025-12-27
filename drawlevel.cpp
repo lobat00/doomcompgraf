@@ -35,7 +35,7 @@ static void desenhaTeto(float x, float z) {
     glColor3f(0.7f, 0.7f, 0.7f); // Um pouco mais escuro para dar profundidade
     bindTexture0(texChao); // Pode usar a mesma do chão ou uma específica
     
-    float half = TILE * 0.5f;
+    float half = (TILE + 0.01f) * 0.5f;
     glBegin(GL_QUADS);
         glTexCoord2f(0.0f, 0.0f); glVertex3f(x - half, WALL_H, z + half);
         glTexCoord2f(2.0f, 0.0f); glVertex3f(x + half, WALL_H, z + half);
@@ -46,7 +46,7 @@ static void desenhaTeto(float x, float z) {
 
 static void desenhaQuadChao(float x, float z, float tile, float tilesUV)
 {
-    float half = tile * 0.5f;
+    float half = (tile + 0.01f) * 0.5f; //teste
 
     glBegin(GL_QUADS);
     glTexCoord2f(0.0f, 0.0f);
@@ -196,23 +196,18 @@ void drawLevel(const MapLoader &map) {
             char c = data[z][x];
 
             // LOGICA DE PISO
-            if (c == '0' || c == 'T') {
-                desenhaTileChao(wx, wz); // Piso Comum
-            } else if (c == 'A' || c == 'C') {
-                // Precisamos que desenhaTileChao aceite a textura como parâmetro 
-                // ou criamos desenhaTileChaoAlt
-                glBindTexture(GL_TEXTURE_2D, texPisoAlt);
+            if (c != 'L' && c != 'B') { 
+                glUseProgram(0);
+                glBindTexture(GL_TEXTURE_2D, (c == 'A' || c == 'C') ? texPisoAlt : texChao);
                 desenhaQuadChao(wx, wz, TILE, 2.0f);
             }
 
             // LOGICA DE PAREDE
-            if (c == '1') {
-                glBindTexture(GL_TEXTURE_2D, texParede); // Pedra
-                desenhaParede(wx, wz);
-            } else if (c == '2') {
-                glBindTexture(GL_TEXTURE_2D, texParedeMetal); // Metal
+            if (c == '1' || c == '2') {
+                glBindTexture(GL_TEXTURE_2D, (c == '1') ? texParede : texParedeMetal);
                 desenhaParede(wx, wz);
             }
+            
 
             // LOGICA DE TETO (Opcional por Tile)
             if (c == 'T' || c == 'C') {

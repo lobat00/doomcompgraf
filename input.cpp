@@ -108,11 +108,11 @@ void atualizaMovimento() {
     float tentZ = dz * passo;
 
     // Slide 4: Margem de segurança (corpo do jogador)
-    float margem = 0.6f;
+    float margem = 1.5f;
     float cX = (tentX > 0) ? tentX + margem : tentX - margem;
     float cZ = (tentZ > 0) ? tentZ + margem : tentZ - margem;
 
-    // Tenta mover no X (Slide 8 - Sliding)
+    // Tenta mover no X
     if (podeAndar(camX + cX, camZ)) {
         camX += tentX;
     }
