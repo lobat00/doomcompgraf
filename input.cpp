@@ -68,17 +68,21 @@ bool podeAndar(float x, float z) {
     // 1. Obtemos as métricas do mapa
     float TILE = 4.0f;
     LevelMetrics m = LevelMetrics::fromMap(gMap, TILE);
+    // 2. Convertemos a posição do mundo (x, z) para coordenadas de grid (col, row)
     int gridX, gridZ;
     
+    // Implementação da fórmula: mapX = floor(playerPos.x / blockSize) + (mapWidth / 2)
     gridX = (int)floor((x / TILE) + (gMap.getWidth() / 2.0f));
     gridZ = (int)floor((z / TILE) + (gMap.getHeight() / 2.0f));
 
+    //bounds check
+    // Verifica se as coordenadas estão dentro dos limites do mapa
     if (gridZ < 0 || gridZ >= (int)gMap.getHeight() || gridX < 0) return false;
-
+    // Verifica se gridX está dentro da largura da linha correspondente
     const auto &data = gMap.data();
     if (gridX >= (int)data[gridZ].size()) return false;
 
-
+    // 3. Verificamos o caractere na célula correspondente do mapa
     char celula = data[gridZ][gridX];
 
     // Se a célula for '1' (Pedra) OU '2' (Metal), o jogador NÃO pode andar
@@ -107,7 +111,7 @@ void atualizaMovimento() {
     float tentX = dx * passo;
     float tentZ = dz * passo;
 
-    // Slide 4: Margem de segurança (corpo do jogador)
+    // Margem de segurança (corpo do jogador)
     float margem = 1.5f;
     float cX = (tentX > 0) ? tentX + margem : tentX - margem;
     float cZ = (tentZ > 0) ? tentZ + margem : tentZ - margem;

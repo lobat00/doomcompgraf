@@ -25,9 +25,9 @@ bool MapLoader::load(const char* filename) {
         if (line.empty() || line[0] == '#')
             continue;
 
-        // detecta spawn '9'
+        // detecta spawn 'P'
         for (int x = 0; x < (int)line.size(); x++) {
-            if (line[x] == '9') {
+            if (line[x] == 'P') {
                 playerStartX = (float)x;
                 playerStartZ = (float)height;
                 line[x] = '0';
