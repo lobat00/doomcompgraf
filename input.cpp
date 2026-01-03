@@ -71,12 +71,11 @@ bool podeAndar(float x, float z) {
     // 2. Convertemos a posição do mundo (x, z) para coordenadas de grid (col, row)
     int gridX, gridZ;
     
-    // Implementação da fórmula: mapX = floor(playerPos.x / blockSize) + (mapWidth / 2)
-    gridX = (int)floor((x / TILE) + (gMap.getWidth() / 2.0f));
-    gridZ = (int)floor((z / TILE) + (gMap.getHeight() / 2.0f));
+    gridX = (int)floor((x - m.offsetX) / m.tile); 
+    gridZ = (int)floor((z - m.offsetZ) / m.tile); 
 
     //bounds check
-    // Verifica se as coordenadas estão dentro dos limites do mapa
+    // Verifica se as coordenadas estão dentro dos limites do mapa      
     if (gridZ < 0 || gridZ >= (int)gMap.getHeight() || gridX < 0) return false;
     // Verifica se gridX está dentro da largura da linha correspondente
     const auto &data = gMap.data();
@@ -89,28 +88,50 @@ bool podeAndar(float x, float z) {
     if (celula == '1' || celula == '2') {
         return false;
     }
-
     // Para qualquer outro caractere (0, T, A, C, L, B), o caminho está livre
     return true; 
 }
 // Atualiza a posição da câmera com base nas teclas pressionadas
 void atualizaMovimento() {
-    float passo = 0.15f; 
-    float radYaw = yaw * M_PI / 180.0f;
-    float dirX = std::sin(radYaw);
-    float dirZ = -std::cos(radYaw);
-    float strafeX = dirZ;
-    float strafeZ = -dirX;
+    float passo = 0.15f; //velocidade de movimento
+    float radYaw = yaw * M_PI / 180.0f; //angulo em radianos
+    float dirX = std::sin(radYaw); // direção X
+    float dirZ = -std::cos(radYaw); // direção Z
+    float strafeX = dirZ; // direção X para strafe
+    float strafeZ = -dirX; // direção Z para strafe
 
-    float dx = 0, dz = 0;
+    /*
+     if (keyW)
+    { // frente
+        camX += dirX * passo;
+        camZ += dirZ * passo;
+    }
+    if (keyS)
+    { // trás
+        camX -= dirX * passo;
+        camZ -= dirZ * passo;
+    }
+    if (keyA)
+    { // strafe esquerda
+        camX += strafeX * passo;
+        camZ += strafeZ * passo;
+    }
+    if (keyD)
+    { // strafe direita
+        camX -= strafeX * passo;
+        camZ -= strafeZ * passo;
+    }
+    */
+
+    float dx = 0, dz = 0; //
     if (keyW) { dx += dirX; dz += dirZ; }
     if (keyS) { dx -= dirX; dz -= dirZ; }
     if (keyA) { dx += strafeX; dz += strafeZ; }
     if (keyD) { dx -= strafeX; dz -= strafeZ; }
 
-    float tentX = dx * passo;
-    float tentZ = dz * passo;
-
+    float tentX = dx * passo; //intenção * deslocamento em X
+    float tentZ = dz * passo; //intenção * deslocamento em Z
+    
     // Margem de segurança (corpo do jogador)
     float margem = 1.5f;
     float cX = (tentX > 0) ? tentX + margem : tentX - margem;

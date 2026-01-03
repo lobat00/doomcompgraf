@@ -144,7 +144,7 @@ int main(int argc, char **argv)
 
     glutTimerFunc(0, timer, 0);
 
-    gMap.load("maps/level1.txt");
+    gMap.load("maps/map1.txt");
     LevelMetrics m = LevelMetrics::fromMap(gMap, 4.0f); 
     m.spawnPos(gMap, camX, camZ);
     camY = 1.5f;
