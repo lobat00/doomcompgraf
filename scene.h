@@ -25,7 +25,7 @@ extern bool keyA;
 extern bool keyS;
 extern bool keyD;
 
-extern MapLoader gMap;       // Avisa que o objeto gMap existe e está na main.cpp
+extern MapLoader gMap;  
 
 void altFullScreen();
 void atualizaCentroJanela(int w, int h);
