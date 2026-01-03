@@ -27,12 +27,11 @@ bool podeAndar(float x, float z) {
     // 2. Convertemos a posição do mundo (x, z) para coordenadas de grid (col, row)
     int gridX, gridZ;
     
-    // Implementação da fórmula: mapX = floor(playerPos.x / blockSize) + (mapWidth / 2)
-    gridX = (int)floor((x / TILE) + (gMap.getWidth() / 2.0f));
-    gridZ = (int)floor((z / TILE) + (gMap.getHeight() / 2.0f));
+    gridX = (int)floor((x - m.offsetX) / m.tile); 
+    gridZ = (int)floor((z - m.offsetZ) / m.tile); 
 
     //bounds check
-    // Verifica se as coordenadas estão dentro dos limites do mapa
+    // Verifica se as coordenadas estão dentro dos limites do mapa      
     if (gridZ < 0 || gridZ >= (int)gMap.getHeight() || gridX < 0) return false;
     // Verifica se gridX está dentro da largura da linha correspondente
     const auto &data = gMap.data();
@@ -45,9 +44,9 @@ bool podeAndar(float x, float z) {
     if (celula == '1' || celula == '2') {
         return false;
     }
-
     // Para qualquer outro caractere (0, T, A, C, L, B), o caminho está livre
     return true; 
+}
 }
 
 ```
