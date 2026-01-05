@@ -68,8 +68,8 @@ bool gameInit(const char *mapPath)
 void gameUpdate(float dt)
 {
     // tempo global pros shaders (lava/sangue)
-    tempo = glutGet(GLUT_ELAPSED_TIME) * 0.001f;
-
+    tempo += dt;
+   
     atualizaMovimento();
 }
 

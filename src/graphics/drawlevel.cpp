@@ -200,7 +200,6 @@ void drawLevel(const MapLoader &map)
 {
     const auto &data = map.data();
     int H = map.getHeight();
-    int W = map.getWidth();
 
     // centraliza o mapa no mundo
     LevelMetrics m = LevelMetrics::fromMap(map, TILE);
