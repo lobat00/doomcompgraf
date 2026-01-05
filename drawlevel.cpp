@@ -12,6 +12,7 @@ extern GLuint texSangue; // pode usar como textura base do sangue (ou crie texBl
 extern GLuint texChao;
 extern GLuint texParedeMetal;
 extern GLuint texPisoAlt;
+extern GLuint texTeto;
 
 extern GLuint progLava;
 extern GLuint progSangue;
@@ -32,10 +33,10 @@ static void bindTexture0(GLuint tex)
 
 static void desenhaTeto(float x, float z) {
     glUseProgram(0);
-    glColor3f(0.7f, 0.7f, 0.7f); // Um pouco mais escuro para dar profundidade
-    bindTexture0(texChao); // Pode usar a mesma do chão ou uma específica
+    glColor3f(0.8f, 0.8f, 0.8f); 
+    glBindTexture(GL_TEXTURE_2D, texTeto); 
     
-    float half = (TILE + 0.01f) * 0.5f;
+    float half = TILE * 0.5f;
     glBegin(GL_QUADS);
         glTexCoord2f(0.0f, 0.0f); glVertex3f(x - half, WALL_H, z + half);
         glTexCoord2f(2.0f, 0.0f); glVertex3f(x + half, WALL_H, z + half);
@@ -195,9 +196,10 @@ void drawLevel(const MapLoader &map) {
             m.tileCenter(x, z, wx, wz);
             char c = data[z][x];
 
-            // LOGICA DE PISO
+        // 1. LÓGICA DE PISO (CHÃO)
             if (c != 'L' && c != 'B') { 
                 glUseProgram(0);
+            // Se for 'A' ou 'C', usa o piso novo (088.png). Se não, usa o padrão (181.png).
                 glBindTexture(GL_TEXTURE_2D, (c == 'A' || c == 'C') ? texPisoAlt : texChao);
                 desenhaQuadChao(wx, wz, TILE, 2.0f);
             }

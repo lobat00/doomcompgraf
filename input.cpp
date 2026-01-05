@@ -71,12 +71,12 @@ bool podeAndar(float x, float z) {
     // 2. Convertemos a posição do mundo (x, z) para coordenadas de grid (col, row)
     int gridX, gridZ;
     
-    gridX = (int)floor((x - m.offsetX) / m.tile); 
-    gridZ = (int)floor((z - m.offsetZ) / m.tile); 
+    gridX = (int)floor((x - m.offsetX) / m.tile); // 2
+    gridZ = (int)floor((z - m.offsetZ) / m.tile); // 
 
     //bounds check
     // Verifica se as coordenadas estão dentro dos limites do mapa      
-    if (gridZ < 0 || gridZ >= (int)gMap.getHeight() || gridX < 0) return false;
+    if (gridZ < 0 || gridZ >= (int)gMap.getHeight() || gridX < 0) return false; 
     // Verifica se gridX está dentro da largura da linha correspondente
     const auto &data = gMap.data();
     if (gridX >= (int)data[gridZ].size()) return false;

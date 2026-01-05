@@ -28,6 +28,7 @@ GLuint progSangue;
 GLuint progLava;
 GLuint texParedeMetal;
 GLuint texPisoAlt;
+GLuint texTeto;
 
 void display()
 {
@@ -125,8 +126,9 @@ int main(int argc, char **argv)
     texParede = carregaTextura("assets/091.png");
     texSangue = carregaTextura("assets/016.png");
     texLava = carregaTextura("assets/179.png");
-    texParedeMetal = carregaTextura("assets/088.png");
-    texPisoAlt = carregaTextura("assets/118.png");
+    texParedeMetal = carregaTextura("assets/060.png");
+    texPisoAlt = carregaTextura("assets/088.png");
+    texTeto = carregaTextura("assets/097.png");
 
     // cria o shader
     progSangue = criaShader("shaders/blood.vert", "shaders/blood.frag");
