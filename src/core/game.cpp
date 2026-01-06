@@ -25,7 +25,7 @@ GLuint progLava;
 float tempo = 0.0f;
 
 static GameAssets gAssets;
-static Level gLevel;
+Level gLevel;
 
 bool gameInit(const char *mapPath)
 {
