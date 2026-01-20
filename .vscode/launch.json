@@ -2,13 +2,25 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run DoomLike",
+      "name": "Rodar Jogo",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/DoomLike",
-      "preLaunchTask": "Build DoomLike (make)",
+      "program": "${workspaceFolder}/build/DoomLike.exe",
+      "args": [],
+      "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
-      "MIMode": "gdb"
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb.exe",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Compilar DoomLike (g++)"
     }
   ]
 }

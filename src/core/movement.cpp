@@ -19,6 +19,9 @@ static bool isWallTile(int tx, int tz)
         return false;
 
     char c = data[tz][tx];
+    // Adicione E, H, A como liberados
+    if (c == 'E' || c == 'H' || c == 'A') return false; 
+
     return (c == '1' || c == '2');
 }
 
@@ -76,7 +79,7 @@ void atualizaMovimento()
 {
     float passo = GameConfig::PLAYER_STEPS;
 
-    float radYaw = yaw * (float)M_PI / 180.0f;
+    float radYaw = yaw * 3.14159265f / 180.0f;
     float dirX = std::sin(radYaw);
     float dirZ = -std::cos(radYaw);
 

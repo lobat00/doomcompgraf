@@ -7,6 +7,8 @@
 #include <GL/glut.h>
 #include <GL/glu.h>
 
+extern void mouseClick(int button, int state, int x, int y);
+
 static const char *kTitle = "Um dia vai ser DOOM";
 
 static void displayCb()
@@ -19,13 +21,13 @@ static void reshapeCb(int w, int h)
 {
     if (h == 0)
         h = 1;
+    float a = (float)w / (float)h;
 
     glViewport(0, 0, w, h);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(70.0, (double)w / (double)h, 0.1, 2000.0);
-
+    gluPerspective(70.0f, a, 0.1f, 2000.0f);    
     glMatrixMode(GL_MODELVIEW);
 
     atualizaCentroJanela(w, h);
@@ -46,6 +48,8 @@ void appInit()
     glutDisplayFunc(displayCb);
     glutReshapeFunc(reshapeCb);
     glutTimerFunc(0, timerCb, 0);
+
+glutMouseFunc(mouseClick); // <--- ADICIONE ISSO
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);

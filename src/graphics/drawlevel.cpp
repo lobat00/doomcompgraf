@@ -3,8 +3,10 @@
 #include <cmath>
 #include "graphics/drawlevel.h"
 #include "core/camera.h"
+#include "core/entities.h"
 #include "level/levelmetrics.h"
 #include <cstdio>
+
 
 extern GLuint texParede;
 extern GLuint texParedeInterna;
@@ -14,6 +16,15 @@ extern GLuint texChao;
 extern GLuint texChaoInterno;
 extern GLuint texTeto;
 
+// Transformando em Arrays para suportar múltiplos inimigos ---
+extern GLuint texEnemies[5];       // Antes era texEnemy
+extern GLuint texEnemiesRage[5];   // Antes era texEnemyRage
+extern GLuint texEnemiesDamage[5]; // Antes era texEnemyDamage
+// -----------------------------------------------------------------------------
+
+extern GLuint texHealth;
+extern GLuint texAmmo;
+
 extern GLuint progLava;
 extern GLuint progSangue;
 
@@ -21,13 +32,13 @@ extern GLuint progSangue;
 extern float tempo;
 
 // Config do grid
-static const float TILE = 4.0f;
-static const float CEILING_H = 4.0f;
-static const float WALL_H = 4.0f;
-static const float EPS_Y = 0.001f;
+static const float TILE = 4.0f;      // tamanho do tile no mundo (ajuste)
+static const float CEILING_H = 4.0f; // altura do teto
+static const float WALL_H = 4.0f;    // altura da parede
+static const float EPS_Y = 0.001f;   // evita z-fighting
 
-static const GLfloat kAmbientOutdoor[] = {0.45f, 0.30f, 0.25f, 1.0f};
-static const GLfloat kAmbientIndoor[] = {0.12f, 0.12f, 0.18f, 1.0f};
+static const GLfloat kAmbientOutdoor[] = {0.45f, 0.30f, 0.25f, 1.0f}; // quente (seu atual)
+static const GLfloat kAmbientIndoor[] = {0.12f, 0.12f, 0.18f, 1.0f};  // frio/azulado
 
 static void bindTexture0(GLuint tex)
 {
@@ -35,7 +46,6 @@ static void bindTexture0(GLuint tex)
     glBindTexture(GL_TEXTURE_2D, tex);
 }
 
-// Flicker
 static float hash01(float x)
 {
     float s = sinf(x * 12.9898f) * 43758.5453f;
@@ -44,17 +54,19 @@ static float hash01(float x)
 
 static float flickerFluorescente(float t)
 {
-    const float rate = 4.0f;
+    const float rate = 4.0f; // era 9.0
     float block = floorf(t * rate);
     float r = hash01(block);
 
-    if (r < 0.22f)
+    if (r < 0.22f) // era 0.12
     {
         float phase = t * rate - block;
 
+        // apagão mais longo
         if (phase > 0.35f && phase < 0.55f)
-            return 0.12f;
+            return 0.12f; // quase apaga
 
+        // as vezes um segundo tranco
         if (r < 0.06f && phase > 0.65f && phase < 0.78f)
             return 0.40f;
     }
@@ -62,10 +74,9 @@ static float flickerFluorescente(float t)
     return 0.96f + 0.04f * sinf(t * 5.0f);
 }
 
-// Iluminação indoor
 static void setIndoorLampAt(float x, float z, float intensity)
 {
-    // posição no teto
+    // posição da lâmpada (pontual)
     GLfloat pos[] = {x, CEILING_H - 0.05f, z, 1.0f};
     glLightfv(GL_LIGHT1, GL_POSITION, pos);
 
@@ -86,9 +97,12 @@ static void setIndoorLampAt(float x, float z, float intensity)
 
 static void beginIndoor(float wx, float wz)
 {
+    // sol NÃO entra
     glDisable(GL_LIGHT0);
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, kAmbientIndoor);
 
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, kAmbientIndoor); // esfria o ambiente
+
+    // lâmpada fria entra
     glEnable(GL_LIGHT1);
 
     float f = flickerFluorescente(tempo);
@@ -102,6 +116,7 @@ static void endIndoor()
     glDisable(GL_LIGHT1);
 
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, kAmbientOutdoor);
+
     glEnable(GL_LIGHT0);
 }
 
@@ -110,8 +125,9 @@ static void desenhaQuadTeto(float x, float z, float tile, float tilesUV)
     float half = tile * 0.5f;
 
     glBegin(GL_QUADS);
-    glNormal3f(0.0f, -1.0f, 0.0f);
+    glNormal3f(0.0f, -1.0f, 0.0f); // NORMAL DO TETO
 
+    // note a ordem invertida
     glTexCoord2f(0.0f, 0.0f);
     glVertex3f(x - half, CEILING_H, z - half);
     glTexCoord2f(tilesUV, 0.0f);
@@ -120,7 +136,6 @@ static void desenhaQuadTeto(float x, float z, float tile, float tilesUV)
     glVertex3f(x + half, CEILING_H, z + half);
     glTexCoord2f(0.0f, tilesUV);
     glVertex3f(x - half, CEILING_H, z + half);
-
     glEnd();
 }
 
@@ -129,7 +144,7 @@ static void desenhaQuadChao(float x, float z, float tile, float tilesUV)
     float half = tile * 0.5f;
 
     glBegin(GL_QUADS);
-    glNormal3f(0.0f, 1.0f, 0.0f);
+    glNormal3f(0.0f, 1.0f, 0.0f); // NORMAL DO CHÃO
 
     glTexCoord2f(0.0f, 0.0f);
     glVertex3f(x - half, EPS_Y, z + half);
@@ -139,19 +154,21 @@ static void desenhaQuadChao(float x, float z, float tile, float tilesUV)
     glVertex3f(x + half, EPS_Y, z - half);
     glTexCoord2f(0.0f, tilesUV);
     glVertex3f(x - half, EPS_Y, z - half);
-
     glEnd();
 }
 
 static void desenhaTileChao(float x, float z, GLuint texChaoX, bool temTeto)
 {
+    glUseProgram(0); // sem shader
     glColor3f(1, 1, 1);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texChaoX);
 
+    // chão
     desenhaQuadChao(x, z, TILE, 2.0f);
 
+    // teto
     if (temTeto)
     {
         glBindTexture(GL_TEXTURE_2D, texTeto);
@@ -159,11 +176,8 @@ static void desenhaTileChao(float x, float z, GLuint texChaoX, bool temTeto)
     }
 }
 
-// Parede por face
-// Face 0 -> Z+  (frente)   -> vizinho em (x, z + 1)
-// Face 1 -> Z-  (trás)     -> vizinho em (x, z - 1)
-// Face 2 -> X+  (direita)  -> vizinho em (x + 1, z)
-// Face 3 -> X-  (esquerda) -> vizinho em (x - 1, z)
+// --- NOVO (Do Professor): Desenha parede FACE POR FACE ---
+// Corrige texturas e permite otimização
 static void desenhaParedePorFace(float x, float z, GLuint texParedeX, int f)
 {
     float half = TILE * 0.5f;
@@ -179,66 +193,60 @@ static void desenhaParedePorFace(float x, float z, GLuint texParedeX, int f)
 
     switch (f)
     {
-    case 0: // z+
+    case 0: // z+ (Frente)
         glNormal3f(0.0f, 0.0f, 1.0f);
-        glTexCoord2f(0.0f, 0.0f);
-        glVertex3f(x - half, 0.0f, z + half);
-        glTexCoord2f(tilesX, 0.0f);
-        glVertex3f(x + half, 0.0f, z + half);
-        glTexCoord2f(tilesX, tilesY);
-        glVertex3f(x + half, WALL_H, z + half);
-        glTexCoord2f(0.0f, tilesY);
-        glVertex3f(x - half, WALL_H, z + half);
+        glTexCoord2f(0.0f, 0.0f);       glVertex3f(x - half, 0.0f, z + half);
+        glTexCoord2f(tilesX, 0.0f);     glVertex3f(x + half, 0.0f, z + half);
+        glTexCoord2f(tilesX, tilesY);   glVertex3f(x + half, WALL_H, z + half);
+        glTexCoord2f(0.0f, tilesY);     glVertex3f(x - half, WALL_H, z + half);
         break;
 
-    case 1: // z-
+    case 1: // z- (Trás)
         glNormal3f(0.0f, 0.0f, -1.0f);
-        glTexCoord2f(0.0f, 0.0f);
-        glVertex3f(x + half, 0.0f, z - half);
-        glTexCoord2f(tilesX, 0.0f);
-        glVertex3f(x - half, 0.0f, z - half);
-        glTexCoord2f(tilesX, tilesY);
-        glVertex3f(x - half, WALL_H, z - half);
-        glTexCoord2f(0.0f, tilesY);
-        glVertex3f(x + half, WALL_H, z - half);
+        glTexCoord2f(0.0f, 0.0f);       glVertex3f(x + half, 0.0f, z - half);
+        glTexCoord2f(tilesX, 0.0f);     glVertex3f(x - half, 0.0f, z - half);
+        glTexCoord2f(tilesX, tilesY);   glVertex3f(x - half, WALL_H, z - half);
+        glTexCoord2f(0.0f, tilesY);     glVertex3f(x + half, WALL_H, z - half);
         break;
 
-    case 2: // x+
+    case 2: // x+ (Direita)
         glNormal3f(1.0f, 0.0f, 0.0f);
-        glTexCoord2f(0.0f, 0.0f);
-        glVertex3f(x + half, 0.0f, z + half);
-        glTexCoord2f(tilesX, 0.0f);
-        glVertex3f(x + half, 0.0f, z - half);
-        glTexCoord2f(tilesX, tilesY);
-        glVertex3f(x + half, WALL_H, z - half);
-        glTexCoord2f(0.0f, tilesY);
-        glVertex3f(x + half, WALL_H, z + half);
+        glTexCoord2f(0.0f, 0.0f);       glVertex3f(x + half, 0.0f, z + half);
+        glTexCoord2f(tilesX, 0.0f);     glVertex3f(x + half, 0.0f, z - half);
+        glTexCoord2f(tilesX, tilesY);   glVertex3f(x + half, WALL_H, z - half);
+        glTexCoord2f(0.0f, tilesY);     glVertex3f(x + half, WALL_H, z + half);
         break;
 
-    case 3: // x-
+    case 3: // x- (Esquerda)
         glNormal3f(-1.0f, 0.0f, 0.0f);
-        glTexCoord2f(0.0f, 0.0f);
-        glVertex3f(x - half, 0.0f, z - half);
-        glTexCoord2f(tilesX, 0.0f);
-        glVertex3f(x - half, 0.0f, z + half);
-        glTexCoord2f(tilesX, tilesY);
-        glVertex3f(x - half, WALL_H, z + half);
-        glTexCoord2f(0.0f, tilesY);
-        glVertex3f(x - half, WALL_H, z - half);
+        glTexCoord2f(0.0f, 0.0f);       glVertex3f(x - half, 0.0f, z - half);
+        glTexCoord2f(tilesX, 0.0f);     glVertex3f(x - half, 0.0f, z + half);
+        glTexCoord2f(tilesX, tilesY);   glVertex3f(x - half, WALL_H, z + half);
+        glTexCoord2f(0.0f, tilesY);     glVertex3f(x - half, WALL_H, z - half);
         break;
     }
     glEnd();
 }
 
+// Wrapper para desenhar o cubo todo (usado em parede outdoor)
 static void desenhaParedeCuboCompleto(float x, float z, GLuint texParedeX)
 {
     desenhaParedePorFace(x, z, texParedeX, 0);
     desenhaParedePorFace(x, z, texParedeX, 1);
     desenhaParedePorFace(x, z, texParedeX, 2);
     desenhaParedePorFace(x, z, texParedeX, 3);
+    // Topo (Opcional se for muito alto, mas bom ter)
+    float half = TILE * 0.5f;
+    glBindTexture(GL_TEXTURE_2D, texParedeX);
+    glBegin(GL_QUADS);
+    glNormal3f(0.0f, 1.0f, 0.0f);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(x - half, WALL_H, z + half);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(x + half, WALL_H, z + half);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(x + half, WALL_H, z - half);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(x - half, WALL_H, z - half);
+    glEnd();
 }
 
-// Lava / Sangue (shaders)
 static void desenhaTileLava(float x, float z)
 {
     glUseProgram(progLava);
@@ -285,12 +293,13 @@ static void desenhaTileSangue(float x, float z)
     glUseProgram(0);
 }
 
+// --- NOVO (Do Professor): Checa vizinhos para saber se desenha a face ---
 static char getTileAt(const MapLoader &map, int tx, int tz)
 {
     const auto &data = map.data();
     const int H = map.getHeight();
 
-    // fora do mapa => considera outdoor
+    // fora do mapa => considera outdoor ('0')
     if (tz < 0 || tz >= H)
         return '0';
 
@@ -302,24 +311,27 @@ static char getTileAt(const MapLoader &map, int tx, int tz)
 
 static void drawFace(float wx, float wz, int face, char neighbor, GLuint texParedeInterna)
 {
+    // Se o vizinho é vazio, lava ou sangue, a parede é visível
     bool outside = (neighbor == '0' || neighbor == 'L' || neighbor == 'B');
 
     if (outside)
     {
-        // OUTDOOR: usa iluminação global (sol)
+        // OUTDOOR: usa iluminação global (sol) para a parede externa
         glDisable(GL_LIGHT1);
         glLightModelfv(GL_LIGHT_MODEL_AMBIENT, kAmbientOutdoor);
         glEnable(GL_LIGHT0);
 
         desenhaParedePorFace(wx, wz, texParedeInterna, face);
     }
-    else
+    else if (neighbor != '2') 
     {
-        // INDOOR: usa lâmpada do teto
+        // INDOOR: Se o vizinho não for outra parede indoor, desenha
+        // (Ex: vizinho é chão indoor '3')
         beginIndoor(wx, wz);
         desenhaParedePorFace(wx, wz, texParedeInterna, face);
         endIndoor();
     }
+    // Se neighbor == '2', não desenha nada (parede colada com parede)
 }
 
 void drawLevel(const MapLoader &map)
@@ -335,31 +347,37 @@ void drawLevel(const MapLoader &map)
         for (int x = 0; x < (int)data[z].size(); x++)
         {
             float wx, wz;
-            m.tileCenter(x, z, wx, wz);
+            m.tileCenter(x, z, wx, wz); // centro do tile
 
             char c = data[z][x];
 
-            if (c == '0') // chão outdoor
-            {
-                desenhaTileChao(wx, wz, texChao, false);
+            // 1. Desenha chão embaixo de entidades (Sua Lógica)
+            if (c == 'J' || c == 'T' || c == 'M' || c == 'K' || c == 'G' || c == 'H' || c == 'A' || c == 'E' || c == 'F' || c == 'I') {
+                 desenhaTileChao(wx, wz, texChao, false);
             }
-            else if (c == '3') // chão indoor
+
+            // 2. Desenha o Bloco
+            if (c == '0') // chão A (outdoor)
+                desenhaTileChao(wx, wz, texChao, false);
+
+            else if (c == '3') // chão B (indoor, tem teto)
             {
                 beginIndoor(wx, wz);
                 desenhaTileChao(wx, wz, texChaoInterno, true);
                 endIndoor();
             }
-            else if (c == '1') // parede outdoor
+            else if (c == '1') // parede A (outdoor)
             {
+                // Outdoor desenha o cubo todo, simplificado
                 desenhaParedeCuboCompleto(wx, wz, texParede);
             }
-            else if (c == '2') // parede indoor
+            else if (c == '2') // parede B (indoor) - AQUI ENTRA A LÓGICA NOVA
             {
-                // vizinhos
-                char vizFrente = getTileAt(map, x, z + 1);
-                char vizTras = getTileAt(map, x, z - 1);
+                // Verifica os 4 vizinhos para saber qual face desenhar
+                char vizFrente  = getTileAt(map, x, z + 1);
+                char vizTras    = getTileAt(map, x, z - 1);
                 char vizDireita = getTileAt(map, x + 1, z);
-                char vizEsq = getTileAt(map, x - 1, z);
+                char vizEsq     = getTileAt(map, x - 1, z);
 
                 drawFace(wx, wz, 0, vizFrente, texParedeInterna);
                 drawFace(wx, wz, 1, vizTras, texParedeInterna);
@@ -376,4 +394,94 @@ void drawLevel(const MapLoader &map)
             }
         }
     }
+}
+
+static void drawSprite(float x, float z, float w, float h, GLuint tex, float camX, float camZ)
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    // Habilita teste alpha para descartar pixels transparentes (recorte)
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.1f);
+
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glColor3f(1, 1, 1);
+
+    glPushMatrix();
+    glTranslatef(x, 0.0f, z); // Vai para a posição do objeto
+
+    // MATEMÁTICA DO BILLBOARD (Olhar para a câmera)
+    // Calcula o ângulo entre o objeto e a câmera
+    float dx = camX - x;
+    float dz = camZ - z;
+    float angle = std::atan2(dx, dz) * 180.0f / 3.14159f;
+    
+    glRotatef(angle, 0.0f, 1.0f, 0.0f); // Gira no eixo Y
+
+    // Desenha o quadrado centralizado
+    float hw = w * 0.5f;
+    
+    glBegin(GL_QUADS);
+    // Normal apontando pro jogador
+    glNormal3f(0, 0, 1); 
+    
+    // Invertido U e V
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(-hw, 0.0f, 0.0f); // Pé esquerdo (no mundo)
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(hw, 0.0f, 0.0f);  // Pé direito
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(hw, h, 0.0f);     // Cabeça direita
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(-hw, h, 0.0f);    // Cabeça esquerda
+    glEnd();
+
+    glPopMatrix();
+
+    glDisable(GL_ALPHA_TEST);
+    glDisable(GL_BLEND);
+}
+
+// Essa é a função principal que vamos chamar no gameRender
+// Precisamos passar a lista de inimigos e itens
+void drawEntities(const std::vector<Enemy>& enemies, const std::vector<Item>& items, float camX, float camZ)
+{
+    glDisable(GL_LIGHTING);
+
+    // Desenha Itens
+    for (const auto& item : items)
+    {
+        if (!item.active) continue;
+
+        if (item.type == ITEM_HEALTH)
+            drawSprite(item.x, item.z, 0.7f, 0.7f, texHealth, camX, camZ);
+        else if (item.type == ITEM_AMMO)
+            drawSprite(item.x, item.z, 0.7f, 0.7f, texAmmo, camX, camZ); 
+    }
+
+    // Desenha Inimigos
+    for (const auto& en : enemies)
+    {
+        if (en.state == STATE_DEAD) continue;
+        
+        // 1. Descobre qual inimigo é (0, 1, 2, 3, 4)
+        int t = en.type;
+        if (t < 0) t = 0;
+        if (t > 4) t = 0;
+
+        GLuint currentTex;
+
+        // 2. Lógica de Estado COM o tipo [t]
+        if (en.hurtTimer > 0.0f) {
+            currentTex = texEnemiesDamage[t]; 
+        }
+        else if (en.state == STATE_CHASE || en.state == STATE_ATTACK) {
+            currentTex = texEnemiesRage[t]; 
+        }
+        else {
+            currentTex = texEnemies[t]; 
+        }
+
+        // 4. DESENHA USANDO A VARIÁVEL ESCOLHIDA
+        drawSprite(en.x, en.z, 2.5f, 2.5f, currentTex, camX, camZ);
+    }
+
+    glEnable(GL_LIGHTING);
 }

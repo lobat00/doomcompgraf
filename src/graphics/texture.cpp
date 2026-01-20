@@ -8,7 +8,7 @@ GLuint carregaTextura(const char *arquivo)
 {
     int largura, altura, canais;
 
-    unsigned char *dados = stbi_load(arquivo, &largura, &altura, &canais, 3);
+    unsigned char *dados = stbi_load(arquivo, &largura, &altura, &canais, 4);
     if (!dados)
     {
         printf("ERRO ao carregar textura: %s\n", arquivo);
@@ -29,16 +29,15 @@ GLuint carregaTextura(const char *arquivo)
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
-        GL_RGB,
+        GL_RGBA,
         largura,
         altura,
         0,
-        GL_RGB,
+        GL_RGBA,
         GL_UNSIGNED_BYTE,
         dados);
 
-    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, largura, altura, GL_RGB, GL_UNSIGNED_BYTE, dados);
-
+    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, largura, altura, GL_RGBA, GL_UNSIGNED_BYTE, dados); // <-- MUDOU AQUI E AQUI
     stbi_image_free(dados);
 
     return texID;
