@@ -1,3 +1,5 @@
+❤️ Nicolas ❤️ (Só faltou a onça pintuda)
+
 # ODEIOS
 - ODEIO DÁRIO
 - ODEIO HELOYSA
@@ -11,7 +13,7 @@ Este projeto utiliza **OpenGL (pipeline fixo + GLSL 1.20)** para renderização,
 como shaders, VBOs e extensões necessárias.
 
 ## 🎥 Demonstração
-https://github.com/user-attachments/assets/14542577-3ce4-4737-b87b-8184c906b062
+https://github.com/user-attachments/assets/e15d84f7-5f58-44b0-a429-0d45a9c4fcaf
 
 ---
 
